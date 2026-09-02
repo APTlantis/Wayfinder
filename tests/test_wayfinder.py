@@ -50,6 +50,15 @@ class WayfinderTests(unittest.TestCase):
         scan = scan_workspace(self.root)
         self.assertEqual([entity.id for entity in scan.entities], ["alpha", "development-drive"])
 
+    def test_standard_manifest_is_a_complete_entity(self) -> None:
+        (self.root / "alpha" / "Standard.manifest.toml").write_text(
+            "[standard]\nid = 'wgs'\ntitle = 'Workspace Governance Standard'\nstatus = 'active'\n",
+            encoding="utf-8",
+        )
+        scan = scan_workspace(self.root)
+        standard = next(entity for entity in scan.entities if entity.id == "wgs")
+        self.assertEqual((standard.kind, standard.lifecycle), ("standard", "active"))
+
     def test_resolve_matches_exact_identifier_and_path(self) -> None:
         scan = scan_workspace(self.root)
         self.assertEqual(match_entities(scan, "alpha")[0].title, "Alpha")
@@ -84,6 +93,15 @@ class WayfinderTests(unittest.TestCase):
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["--workspace-root", str(self.root), "--json", "resolve", "alpha"]), 0)
         self.assertEqual(__import__("json").loads(output.getvalue())["status"], "ok")
+
+    def test_discover_hides_incomplete_records_and_global_diagnostics_by_default(self) -> None:
+        make_workspace(self.root, malformed=True)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--workspace-root", str(self.root), "--json", "discover"]), 0)
+        payload = __import__("json").loads(output.getvalue())
+        self.assertEqual(payload["status"], "ok")
+        self.assertNotIn("warnings", payload)
 
     def test_missing_entity_returns_three(self) -> None:
         with contextlib.redirect_stderr(io.StringIO()):

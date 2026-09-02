@@ -7,7 +7,7 @@ Wayfinder reads Aptlantis workspace metadata and reports deterministic entity di
 ## Usage
 
 ```text
-wayfinder [--workspace-root PATH] [--json] discover
+wayfinder [--workspace-root PATH] [--json] discover [--include-incomplete] [--diagnostics]
 wayfinder [--workspace-root PATH] [--json] resolve IDENTIFIER
 wayfinder [--workspace-root PATH] [--json] context TARGET
 ```
@@ -15,7 +15,7 @@ wayfinder [--workspace-root PATH] [--json] context TARGET
 ## Inputs
 
 - Arguments: `IDENTIFIER` and `TARGET` are exact entity id, title, declared path, or observed physical path values.
-- Options: `--workspace-root PATH` defaults to `D:\`; `--json` requests machine output.
+- Options: `--workspace-root PATH` defaults to `D:\`; `--json` requests machine output. `discover --include-incomplete` exposes template/incomplete records; `discover --diagnostics` emits workspace-wide diagnostics.
 - Environment: none.
 - Files: `Development.manifest.toml`, registered root manifests, declared read-first files, and governing standard READMEs. Parsed content is never executed.
 
@@ -23,7 +23,7 @@ wayfinder [--workspace-root PATH] [--json] context TARGET
 
 ### Human Output
 
-`discover` writes a tabular entity list to stdout. `resolve` writes the resolved entity record. `context` writes ordered `role: path` context entries. Normal warnings and errors are not mixed into stdout.
+`discover` writes a curated tabular entity list to stdout, including only records with an id, title, and kind. `--include-incomplete` exposes raw records. `resolve` writes the resolved entity record. `context` writes ordered `role: path` context entries. Normal warnings and errors are not mixed into stdout.
 
 ### Machine Output
 
@@ -47,7 +47,7 @@ With `--json`, stdout contains exactly one CTS envelope. Stable top-level fields
 ## Stability
 
 - Command name: `discover`, `resolve`, and `context` are stable in v0.1.0.
-- Flag names: `--workspace-root` and `--json` are stable.
+- Flag names: `--workspace-root`, `--json`, `--include-incomplete`, and `--diagnostics` are stable.
 - Machine-readable fields: fields documented in Machine Output are stable for automation.
 - Breaking-change policy: removing or changing stable commands, flags, exit-code meanings, stdout/stderr behavior, or stable field types requires a major-version migration note.
 

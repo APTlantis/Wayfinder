@@ -10,7 +10,7 @@ from .model import Diagnostic, Entity, ScanResult
 EXCLUDED_DIRECTORIES = {
     ".git", ".idea", ".venv", "__pycache__", "node_modules", "build", "dist",
     "target", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".tox", "City Planning",
-    "migration-notes", "templates", "examples", "tests",
+    "migration-notes", "templates", "examples", "tests", "Blanks", "static", "public", "references",
 }
 ENTITY_REFERENCE_RELATIONSHIPS = {
     "depends_on_projects", "used_by_projects", "related_projects", "child_projects", "children",
@@ -51,6 +51,7 @@ def _entity_from(path: Path, data: dict[str, Any]) -> Entity:
 
     entity = table("entity")
     project = table("project")
+    standard = table("standard")
     directory = table("directory")
     lifecycle = table("lifecycle")
     state = table("state")
@@ -64,10 +65,10 @@ def _entity_from(path: Path, data: dict[str, Any]) -> Entity:
         read_first = []
     declared = paths.get("root") or directory.get("path")
     return Entity(
-        id=entity.get("id") or project.get("id"),
-        title=entity.get("title") or project.get("title"),
-        kind=entity.get("kind") or project.get("type"),
-        lifecycle=lifecycle.get("state") or project.get("stage") or state.get("stage"),
+        id=entity.get("id") or project.get("id") or standard.get("id"),
+        title=entity.get("title") or project.get("title") or standard.get("title"),
+        kind=entity.get("kind") or project.get("type") or ("standard" if standard else None),
+        lifecycle=lifecycle.get("state") or project.get("stage") or state.get("stage") or standard.get("status"),
         declared_path=declared,
         physical_path=str(path.parent),
         manifest_path=str(path),
@@ -155,6 +156,11 @@ def diagnostics_for_entity(scan: ScanResult, entity: Entity) -> list[Diagnostic]
     """Return scan diagnostics whose provenance is the selected entity record."""
     manifest = _windowsish(entity.manifest_path)
     return [item for item in scan.diagnostics if item.path and _windowsish(item.path) == manifest]
+
+
+def is_complete_entity(entity: Entity) -> bool:
+    """A curated discovery record needs a stable identity and declared kind."""
+    return bool(entity.id and entity.title and entity.kind)
 
 
 def resolve_document(base: Path, declared: str) -> Path:
