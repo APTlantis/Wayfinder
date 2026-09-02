@@ -9,7 +9,12 @@ from .model import Diagnostic, Entity, ScanResult
 
 EXCLUDED_DIRECTORIES = {
     ".git", ".idea", ".venv", "__pycache__", "node_modules", "build", "dist",
-    "target", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".tox",
+    "target", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".tox", "City Planning",
+    "migration-notes", "templates", "examples", "tests",
+}
+ENTITY_REFERENCE_RELATIONSHIPS = {
+    "depends_on_projects", "used_by_projects", "related_projects", "child_projects", "children",
+    "supersedes", "superseded_by",
 }
 
 
@@ -114,7 +119,7 @@ def _append_relationship_diagnostics(entities: list[Entity], diagnostics: list[D
     ids = {entity.id for entity in entities if entity.id}
     for entity in entities:
         for relationship, value in entity.relationships.items():
-            if relationship == "parent" or not isinstance(value, list):
+            if relationship not in ENTITY_REFERENCE_RELATIONSHIPS or not isinstance(value, list):
                 continue
             for item in value:
                 if isinstance(item, str) and item and item not in ids:

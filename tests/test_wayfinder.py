@@ -13,7 +13,7 @@ from wayfinder.cli import main
 from wayfinder.scanner import match_entities, scan_workspace
 
 
-def make_workspace(root: Path, duplicate: bool = False, malformed: bool = False) -> None:
+def make_workspace(root: Path, duplicate: bool = False, malformed: bool = False, broken: bool = False) -> None:
     (root / "AGENTS.md").write_text("# Root\n", encoding="utf-8")
     (root / "Development.manifest.toml").write_text(
         "[manifest]\nmanifest_type = 'workspace'\n[entity]\nid = 'development-drive'\ntitle = 'Development'\n[workspace]\nroot = 'fixture'\n[standards]\nwgs = 'standards/WGS'\ncts = 'standards/CTS'\n[[roots]]\npath = 'alpha'\nkind = 'portfolio'\n",
@@ -24,8 +24,9 @@ def make_workspace(root: Path, duplicate: bool = False, malformed: bool = False)
     (root / "alpha").mkdir(exist_ok=True)
     (root / "alpha" / "AGENTS.md").write_text("# Alpha\n", encoding="utf-8")
     (root / "alpha" / "Project-README.md").write_text("# Alpha\n", encoding="utf-8")
+    broken_relationship = "[relationships]\nrelated_projects = ['missing-project']\n" if broken else ""
     (root / "alpha" / "Alpha.manifest.toml").write_text(
-        "[manifest]\nmanifest_type = 'project'\n[entity]\nid = 'alpha'\ntitle = 'Alpha'\nkind = 'project'\n[lifecycle]\nstate = 'planning'\n[governance]\nprimary_standard = 'WGS'\n[agent]\nread_first = ['Project-README.md']\n",
+        "[manifest]\nmanifest_type = 'project'\n[entity]\nid = 'alpha'\ntitle = 'Alpha'\nkind = 'project'\n[lifecycle]\nstate = 'planning'\n[governance]\nprimary_standard = 'WGS'\n[agent]\nread_first = ['Project-README.md']\n" + broken_relationship,
         encoding="utf-8",
     )
     if duplicate:
@@ -58,6 +59,11 @@ class WayfinderTests(unittest.TestCase):
         make_workspace(self.root, malformed=True)
         scan = scan_workspace(self.root)
         self.assertTrue(any(item.code == "manifest-unreadable" for item in scan.diagnostics))
+
+    def test_broken_entity_relationship_is_a_visible_diagnostic(self) -> None:
+        make_workspace(self.root, broken=True)
+        scan = scan_workspace(self.root)
+        self.assertTrue(any(item.code == "unresolved-relationship" for item in scan.diagnostics))
 
     def test_ambiguous_identifier_returns_four(self) -> None:
         make_workspace(self.root, duplicate=True)
