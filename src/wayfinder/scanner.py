@@ -151,6 +151,12 @@ def match_entities(scan: ScanResult, identifier: str) -> list[Entity]:
     return matches
 
 
+def diagnostics_for_entity(scan: ScanResult, entity: Entity) -> list[Diagnostic]:
+    """Return scan diagnostics whose provenance is the selected entity record."""
+    manifest = _windowsish(entity.manifest_path)
+    return [item for item in scan.diagnostics if item.path and _windowsish(item.path) == manifest]
+
+
 def resolve_document(base: Path, declared: str) -> Path:
     candidate = Path(declared)
     return candidate if candidate.is_absolute() else base / candidate

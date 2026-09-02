@@ -9,7 +9,7 @@ from typing import Any
 from . import __version__
 from .model import Diagnostic, Entity, ScanResult
 from .resolver import context_for
-from .scanner import match_entities, scan_workspace
+from .scanner import diagnostics_for_entity, match_entities, scan_workspace
 
 TOOL = "wayfinder"
 
@@ -88,10 +88,11 @@ def _run(argv: list[str] | None = None) -> int:
             print("\n".join(item.manifest_path for item in matches), file=sys.stderr)
         return 4
     entity = matches[0]
+    entity_diagnostics = diagnostics_for_entity(scan, entity)
     if args.command == "resolve":
-        return _emit(args, "warning" if scan.diagnostics else "ok", {"entity": entity.to_dict()}, scan.diagnostics, json.dumps(entity.to_dict(), indent=2))
+        return _emit(args, "warning" if entity_diagnostics else "ok", {"entity": entity.to_dict()}, entity_diagnostics, json.dumps(entity.to_dict(), indent=2))
     result = context_for(scan, entity)
-    diagnostics = scan.diagnostics + [Diagnostic(**item) for item in result.pop("diagnostics")]
+    diagnostics = entity_diagnostics + [Diagnostic(**item) for item in result.pop("diagnostics")]
     text = "\n".join(f"{item['role']}: {item['path']}" for item in result["context"])
     return _emit(args, "warning" if diagnostics else "ok", result, diagnostics, text)
 

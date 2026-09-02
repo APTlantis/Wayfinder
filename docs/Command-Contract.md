@@ -31,7 +31,7 @@ With `--json`, stdout contains exactly one CTS envelope. Stable top-level fields
 
 ### Diagnostics
 
-Warnings, parse observations, unresolved entity relationships, path drift, missing declared context records, and all errors go to stderr. JSON-mode stdout contains no progress or diagnostic text.
+`discover` reports workspace-wide parse observations, unresolved entity relationships, and path drift. `resolve` and `context` report only diagnostics sourced by the selected entity plus missing records in that entity's context bundle. All diagnostics and errors go to stderr; JSON-mode stdout contains no progress or diagnostic text.
 
 ## Exit Codes
 

@@ -78,6 +78,13 @@ class WayfinderTests(unittest.TestCase):
         self.assertEqual(payload["tool"], "wayfinder")
         self.assertEqual(payload["data"]["context"][0]["role"], "workspace-instructions")
 
+    def test_resolve_does_not_attach_unrelated_workspace_diagnostics(self) -> None:
+        make_workspace(self.root, malformed=True)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--workspace-root", str(self.root), "--json", "resolve", "alpha"]), 0)
+        self.assertEqual(__import__("json").loads(output.getvalue())["status"], "ok")
+
     def test_missing_entity_returns_three(self) -> None:
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["--workspace-root", str(self.root), "resolve", "missing"]), 3)
