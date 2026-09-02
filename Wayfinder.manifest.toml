@@ -1,0 +1,86 @@
+[manifest]
+schema = "APTlantis Entity Manifest"
+schema_version = "2.4"
+manifest_type = "project"
+canonical_name = "Wayfinder.manifest.toml"
+last_updated = "2026-09-02"
+maintainer = "Herb"
+
+[entity]
+id = "wayfinder"
+title = "Wayfinder"
+kind = "project"
+class = "command-tool"
+status = "active"
+description = "Local read-only workspace discovery and context-resolution tool for human operators and agents."
+tags = ["workspace", "discovery", "context", "governance", "agent", "cli"]
+
+[project]
+type = "command-tool"
+stage = "implementation"
+version = "0.1.0"
+
+[governance]
+primary_standard = "PPS"
+release_standard = "CTS"
+additional_standards = ["WGS"]
+proposal_required = true
+
+[lifecycle]
+state = "active"
+created = "2026-09-02"
+last_updated = "2026-09-02"
+maintainer = "Herb"
+completion_percent = 70
+
+[paths]
+root = "D:\\.zoning\\Wayfinder"
+docs = "docs"
+source = "src"
+artifacts = ""
+data = ""
+
+[documentation]
+readme = "README.md"
+project_readme = "Project-README.md"
+proposal = "Project-Proposal.md"
+roadmap = "Roadmap.md"
+architecture = ""
+release_notes = ""
+
+[runtime]
+platform = "Windows"
+language_primary = "Python"
+languages_used = ["Python"]
+services = []
+storage = ["local-filesystem"]
+
+[relationships]
+depends_on_projects = []
+used_by_projects = []
+related_projects = []
+external_dependencies = []
+
+[state]
+stability = "experimental"
+active_development = true
+known_gaps = [
+  "The project remains in D:\\.zoning pending a later promotion review; it is not registered as a CTS child.",
+  "v0.1 has local CLI/test evidence only; package distribution, release hashing, and release evidence are not yet established."
+]
+technical_debt = "none-known"
+
+[agent]
+read_first = [
+  "AGENTS.md",
+  "Wayfinder.manifest.toml",
+  "Project-README.md",
+  "Project-Proposal.md",
+  "Scope-Boundary.md",
+  "Success-Criteria.md",
+  "Risk-Assessment.md",
+  "Roadmap.md"
+]
+governing_context = "PPS defines project intent; WGS defines workspace authority and placement; CTS governs the command surface."
+safe_to_modify = true
+notes = "The Python v0.1 implementation is read-only by design. Do not add mutation, caching, network access, a watcher, or semantic inference without a PPS revision."

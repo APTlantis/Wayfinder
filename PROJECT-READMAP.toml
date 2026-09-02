@@ -1,0 +1,18 @@
+schema = "cityhall.project-readmap"
+schema_version = "1.0"
+
+mandatory = [
+  "AGENTS.md",
+  "Wayfinder.manifest.toml",
+  "Project-README.md",
+  "Project-Proposal.md",
+  "docs/Command-Contract.md",
+]
+priority = ["src/wayfinder/cli.py", "src/wayfinder/model.py", "src/wayfinder/scanner.py"]
+evidence = ["tests/test_wayfinder.py", "docs/JSON-Examples.md"]
+secondary = ["Scope-Boundary.md", "Success-Criteria.md", "Risk-Assessment.md", "Roadmap.md"]
+exclude = [".git/**", ".venv/**", "build/**", "dist/**", "__pycache__/**"]
+
+[budget]
+analyzer_file_budget = 25
+mandatory_file_budget = 5
