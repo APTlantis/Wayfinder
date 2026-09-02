@@ -103,6 +103,12 @@ class WayfinderTests(unittest.TestCase):
         self.assertEqual(payload["status"], "ok")
         self.assertNotIn("warnings", payload)
 
+    def test_markdown_output_is_a_structured_table(self) -> None:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--workspace-root", str(self.root), "--markdown", "context", "alpha"]), 0)
+        self.assertEqual(output.getvalue().splitlines()[0], "| Order | Role | Path | Exists |")
+
     def test_missing_entity_returns_three(self) -> None:
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["--workspace-root", str(self.root), "resolve", "missing"]), 3)

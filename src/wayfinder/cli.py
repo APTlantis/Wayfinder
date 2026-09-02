@@ -25,7 +25,9 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog=TOOL, description="Read-only Aptlantis workspace discovery and context resolution.")
     parser.add_argument("--version", action="version", version=f"{TOOL} {__version__}")
     parser.add_argument("--workspace-root", type=Path, default=Path("D:\\"), help="Workspace root (default: D:\\).")
-    parser.add_argument("--json", action="store_true", dest="json_output", help="Emit one CTS JSON envelope on stdout.")
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--json", action="store_true", dest="json_output", help="Emit one CTS JSON envelope on stdout.")
+    output.add_argument("--markdown", action="store_true", help="Emit a Markdown table on stdout.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     discover = subparsers.add_parser("discover", help="List current manifest-backed workspace entities.")
     discover.add_argument("--include-incomplete", action="store_true", help="Include templates and incomplete manifest records.")
@@ -43,9 +45,46 @@ def _text_discover(entities: list[Entity]) -> str:
     return "\n".join(lines)
 
 
-def _emit(args: argparse.Namespace, status: str, data: dict[str, Any], diagnostics: list[Diagnostic], text: str) -> int:
+def _markdown_cell(value: object) -> str:
+    if value is None or value == "":
+        return "—"
+    return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", "<br>")
+
+
+def _markdown_table(headers: list[str], rows: list[list[object]]) -> str:
+    header = "| " + " | ".join(headers) + " |"
+    separator = "| " + " | ".join("---" for _ in headers) + " |"
+    body = ["| " + " | ".join(_markdown_cell(value) for value in row) + " |" for row in rows]
+    return "\n".join([header, separator, *body])
+
+
+def _markdown_discover(entities: list[Entity]) -> str:
+    return _markdown_table(
+        ["ID", "Title", "Kind", "Lifecycle", "Physical path"],
+        [[item.id, item.title, item.kind, item.lifecycle, item.physical_path] for item in entities],
+    )
+
+
+def _markdown_entity(entity: Entity) -> str:
+    return _markdown_table(
+        ["Field", "Value"],
+        [["ID", entity.id], ["Title", entity.title], ["Kind", entity.kind], ["Lifecycle", entity.lifecycle],
+         ["Declared path", entity.declared_path], ["Physical path", entity.physical_path], ["Manifest", entity.manifest_path]],
+    )
+
+
+def _markdown_context(context: list[dict[str, str]]) -> str:
+    return _markdown_table(
+        ["Order", "Role", "Path", "Exists"],
+        [[index, item["role"], item["path"], item["exists"]] for index, item in enumerate(context, start=1)],
+    )
+
+
+def _emit(args: argparse.Namespace, status: str, data: dict[str, Any], diagnostics: list[Diagnostic], text: str, markdown: str) -> int:
     if args.json_output:
         print(json.dumps(_envelope(status, data, diagnostics), indent=2, sort_keys=True))
+    elif args.markdown:
+        print(markdown)
     else:
         print(text)
     for diagnostic in diagnostics:
@@ -77,7 +116,7 @@ def _run(argv: list[str] | None = None) -> int:
             "included_incomplete": args.include_incomplete,
             "included_diagnostics": args.diagnostics,
         }
-        return _emit(args, "warning" if diagnostics else "ok", data, diagnostics, _text_discover(entities))
+        return _emit(args, "warning" if diagnostics else "ok", data, diagnostics, _text_discover(entities), _markdown_discover(entities))
     identifier = args.identifier if args.command == "resolve" else args.target
     matches = match_entities(scan, identifier)
     if not matches:
@@ -99,11 +138,11 @@ def _run(argv: list[str] | None = None) -> int:
     entity = matches[0]
     entity_diagnostics = diagnostics_for_entity(scan, entity)
     if args.command == "resolve":
-        return _emit(args, "warning" if entity_diagnostics else "ok", {"entity": entity.to_dict()}, entity_diagnostics, json.dumps(entity.to_dict(), indent=2))
+        return _emit(args, "warning" if entity_diagnostics else "ok", {"entity": entity.to_dict()}, entity_diagnostics, json.dumps(entity.to_dict(), indent=2), _markdown_entity(entity))
     result = context_for(scan, entity)
     diagnostics = entity_diagnostics + [Diagnostic(**item) for item in result.pop("diagnostics")]
     text = "\n".join(f"{item['role']}: {item['path']}" for item in result["context"])
-    return _emit(args, "warning" if diagnostics else "ok", result, diagnostics, text)
+    return _emit(args, "warning" if diagnostics else "ok", result, diagnostics, text, _markdown_context(result["context"]))
 
 
 def main(argv: list[str] | None = None) -> int:

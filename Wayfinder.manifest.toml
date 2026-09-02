@@ -74,7 +74,7 @@ technical_debt = "none-known"
 
 [verification]
 level = "local-implementation-verified"
-evidence = "2026-09-02: eleven isolated unittest cases passed; CTS command contract and JSON fixtures validated; default D:\\ root smoke lookup resolved Wayfinder, and curated discovery suppressed incomplete records and global diagnostics by default."
+evidence = "2026-09-02: twelve isolated unittest cases passed; CTS command contract and JSON fixtures validated; default D:\\ root smoke lookup resolved Wayfinder, curated discovery suppressed incomplete records and global diagnostics by default, and Markdown context-table output was verified."
 reviewed = "2026-09-02"
 build_verified = true
 tests_verified = true

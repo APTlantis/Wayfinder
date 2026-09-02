@@ -32,6 +32,10 @@ wayfinder resolve wayfinder
 # Recover the authority and read-first context for an entity.
 wayfinder context zoning
 
+# Copy a structured Markdown table into a report or issue.
+wayfinder --markdown discover
+wayfinder --markdown context zoning
+
 # Inspect another workspace root explicitly.
 wayfinder --workspace-root D:\.zoning\Wayfinder context wayfinder
 ```
@@ -64,7 +68,7 @@ wayfinder --json resolve wayfinder
 wayfinder --workspace-root D:\ --json context zoning
 ```
 
-Stable JSON envelope fields are `status`, `tool`, `version`, and `data`. See the [command contract](docs/Command-Contract.md) and [JSON examples](docs/JSON-Examples.md) for the stable entity and context fields, diagnostics, and exit codes.
+Stable JSON envelope fields are `status`, `tool`, `version`, and `data`. Use `--markdown` when the result should be pasted into a Markdown document; it is mutually exclusive with `--json`. See the [command contract](docs/Command-Contract.md) and [JSON examples](docs/JSON-Examples.md) for the stable entity and context fields, diagnostics, and exit codes.
 
 ## Development
 
