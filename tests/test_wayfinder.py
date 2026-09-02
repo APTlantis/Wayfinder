@@ -82,6 +82,13 @@ class WayfinderTests(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["--workspace-root", str(self.root), "resolve", "missing"]), 3)
 
+    def test_cli_does_not_write_to_the_workspace_root(self) -> None:
+        before = {path.relative_to(self.root): path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--workspace-root", str(self.root), "context", "alpha"]), 0)
+        after = {path.relative_to(self.root): path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        self.assertEqual(after, before)
+
 
 if __name__ == "__main__":
     unittest.main()

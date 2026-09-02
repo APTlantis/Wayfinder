@@ -45,7 +45,9 @@ readme = "README.md"
 project_readme = "Project-README.md"
 proposal = "Project-Proposal.md"
 roadmap = "Roadmap.md"
-architecture = ""
+architecture = "docs\\Architecture.md"
+command_contract = "docs\\Command-Contract.md"
+project_readmap = "PROJECT-READMAP.toml"
 release_notes = ""
 
 [runtime]
@@ -69,6 +71,16 @@ known_gaps = [
   "v0.1 has local CLI/test evidence only; package distribution, release hashing, and release evidence are not yet established."
 ]
 technical_debt = "none-known"
+
+[verification]
+level = "local-implementation-verified"
+evidence = "2026-09-02: eight isolated unittest cases passed; CTS command contract and JSON fixtures validated; default D:\\ root smoke lookup resolved Wayfinder with workspace diagnostics preserved."
+reviewed = "2026-09-02"
+build_verified = true
+tests_verified = true
+artifact_verified = false
+release_verified = false
+notes = "No package distribution, signing, hash, or publication evidence has been produced."
 
 [agent]
 read_first = [

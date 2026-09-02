@@ -51,7 +51,7 @@ def _emit(args: argparse.Namespace, status: str, data: dict[str, Any], diagnosti
     return 0
 
 
-def main(argv: list[str] | None = None) -> int:
+def _run(argv: list[str] | None = None) -> int:
     parser = _parser()
     try:
         args = parser.parse_args(argv)
@@ -94,6 +94,19 @@ def main(argv: list[str] | None = None) -> int:
     diagnostics = scan.diagnostics + [Diagnostic(**item) for item in result.pop("diagnostics")]
     text = "\n".join(f"{item['role']}: {item['path']}" for item in result["context"])
     return _emit(args, "warning" if diagnostics else "ok", result, diagnostics, text)
+
+
+def main(argv: list[str] | None = None) -> int:
+    try:
+        return _run(argv)
+    except Exception as exc:  # Defensive boundary for the stable CLI contract.
+        diagnostic = Diagnostic("internal-error", str(exc), severity="error")
+        arguments = argv if argv is not None else sys.argv[1:]
+        if "--json" in arguments:
+            print(json.dumps(_envelope("error", {}, [diagnostic]), indent=2, sort_keys=True))
+        else:
+            print(f"error: {diagnostic.message}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
